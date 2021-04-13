@@ -1,15 +1,20 @@
 package br.com.escolageo.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import br.com.escolageo.model.Aluno;
+import br.com.escolageo.repository.AlunoRepository;
 
 @Controller
 @RequestMapping("alunos")
 public class AlunoController {
+	
+	@Autowired
+	private AlunoRepository alunoRepository;
 
 	@GetMapping("cadastrar")
 	public String cadastrar(Aluno aluno) {
@@ -19,6 +24,7 @@ public class AlunoController {
 	@PostMapping("salvar")
 	public String salvar(Aluno aluno) {
 		System.out.println(aluno);
+		alunoRepository.salvar(aluno);
 		return "redirect:/";
 	}
 }
