@@ -1,6 +1,9 @@
 package br.com.escolageo.codecs;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 
 import org.bson.BsonReader;
 import org.bson.BsonString;
@@ -47,8 +50,24 @@ public class AlunoCodec implements CollectibleCodec<Aluno> {
 
 	@Override
 	public Aluno decode(BsonReader reader, DecoderContext decoderContext) {
-		// TODO Auto-generated method stub
-		return null;
+		Document document = codec.decode(reader, decoderContext);
+		
+		Aluno aluno = new Aluno();
+		
+		aluno.setId(document.getObjectId("_id"));
+		aluno.setNome(document.getString("nome"));
+		
+		LocalDate dataNascimento = document.getDate("data_nascimento").toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		aluno.setDataNascimento(dataNascimento);
+		
+		Document curso = (Document) document.get("curso");
+
+		if (curso != null) {
+			String nomeCurso = curso.getString("nome");
+			aluno.setCurso(new Curso(nomeCurso));
+		}
+		
+		return aluno;
 	}
 
 	@Override
