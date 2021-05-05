@@ -1,7 +1,5 @@
 package br.com.escolageo.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,38 +9,29 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import br.com.escolageo.model.Aluno;
+import br.com.escolageo.model.Habilidade;
 import br.com.escolageo.repository.AlunoRepository;
 
 @Controller
-public class AlunoController {
+public class HabilidadeController {
 
 	@Autowired
 	private AlunoRepository alunoRepository;
 
-	@GetMapping("/aluno/cadastrar")
-	public String cadastrar(Model model) {
-		model.addAttribute("aluno", new Aluno());
-		return "aluno/cadastrar";
-	}
-
-	@GetMapping("/aluno/listar")
-	public String listar(Model model) {
-		List<Aluno> alunos = alunoRepository.obterTodosAlunos();
-		model.addAttribute("alunos", alunos);
-		return "aluno/listar";
-	}
-
-	@GetMapping("/aluno/visualizar/{id}")
-	public String visualizar(@PathVariable String id, Model model) {
+	@GetMapping("habilidade/salvar/{id}")
+	public String cadastrar(@PathVariable String id, Model model) {
 		Aluno aluno = alunoRepository.obterAlunoPor(id);
 		model.addAttribute("aluno", aluno);
-		return "aluno/visualizar";
+		model.addAttribute("habilidade", new Habilidade());
+		return "habilidade/cadastrar";
 	}
 
-	@PostMapping("aluno/salvar")
-	public String salvar(@ModelAttribute Aluno aluno) {
+	@PostMapping("habilidade/salvar/{id}")
+	public String salvar(@PathVariable String id, @ModelAttribute Habilidade habilidade) {
+		Aluno aluno = alunoRepository.obterAlunoPor(id);
+		aluno.adiciona(aluno, habilidade);
 		alunoRepository.salvar(aluno);
-		System.out.println(aluno);
-		return "redirect:/";
+		return "redirect:/aluno/listar";
 	}
+
 }
