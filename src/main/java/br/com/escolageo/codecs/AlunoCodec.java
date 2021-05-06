@@ -16,6 +16,7 @@ import org.bson.codecs.EncoderContext;
 import org.bson.types.ObjectId;
 
 import br.com.escolageo.model.Aluno;
+import br.com.escolageo.model.Contato;
 import br.com.escolageo.model.Curso;
 import br.com.escolageo.model.Habilidade;
 import br.com.escolageo.model.Nota;
@@ -35,12 +36,20 @@ public class AlunoCodec implements CollectibleCodec<Aluno> {
 		Date dataNascimento = aluno.getDataNascimento();
 		Curso curso = aluno.getCurso();
 		List<Habilidade> habilidades = aluno.getHabilidades();
+		Contato contato = aluno.getContato();
+
+		List<Double> coordinates = new ArrayList<Double>();
+		for (Double location : contato.getCoordinates()) {
+			coordinates.add(location);
+		}
 
 		Document documento = new Document();
 		documento.put("_id", id);
 		documento.put("nome", nome);
 		documento.put("data_nascimento", dataNascimento);
 		documento.put("curso", new Document("nome", curso.getNome()));
+		documento.put("contato", new Document().append("endereco", contato.getEndereco())
+				.append("coordinates", coordinates).append("type", contato.getType()));
 
 		List<Nota> notas = aluno.getNotas();
 
@@ -103,6 +112,13 @@ public class AlunoCodec implements CollectibleCodec<Aluno> {
 		if (curso != null) {
 			String nomeCurso = curso.getString("nome");
 			aluno.setCurso(new Curso(nomeCurso));
+		}
+
+		Document contato = (Document) document.get("contato");
+		if (contato != null) {
+			String endereco = contato.getString("contato");
+			List<Double> coordinates = (List<Double>) contato.get("coordinates");
+			aluno.setContato(new Contato(endereco, coordinates));
 		}
 
 		return aluno;

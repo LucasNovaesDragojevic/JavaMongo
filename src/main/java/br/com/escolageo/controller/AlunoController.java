@@ -13,12 +13,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import br.com.escolageo.model.Aluno;
 import br.com.escolageo.repository.AlunoRepository;
+import br.com.escolageo.service.GeolocalizacaoService;
 
 @Controller
 public class AlunoController {
 
 	@Autowired
 	private AlunoRepository alunoRepository;
+
+	@Autowired
+	private GeolocalizacaoService geolocalizacaoService;
 
 	@GetMapping("/aluno/cadastrar")
 	public String cadastrar(Model model) {
@@ -52,9 +56,17 @@ public class AlunoController {
 		return "aluno/pesquisarnome";
 	}
 
-	@PostMapping("aluno/salvar")
+	@PostMapping("/aluno/salvar")
 	public String salvar(@ModelAttribute Aluno aluno) {
-		alunoRepository.salvar(aluno);
+		try {
+			List<Double> latELong = geolocalizacaoService.obterLatELongPor(aluno.getContato());
+			aluno.getContato().setCoordinates(latELong);
+			alunoRepository.salvar(aluno);
+		} catch (Exception e) {
+			System.out.println("Endereco nao localizado");
+			e.printStackTrace();
+		}
+
 		System.out.println(aluno);
 		return "redirect:/";
 	}

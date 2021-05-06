@@ -16,6 +16,9 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Indexes;
+import com.mongodb.client.model.geojson.Point;
+import com.mongodb.client.model.geojson.Position;
 
 import br.com.escolageo.codecs.AlunoCodec;
 import br.com.escolageo.model.Aluno;
@@ -112,5 +115,20 @@ public class AlunoRepository {
 
 	private void fecharConexao() {
 		this.cliente.close();
+	}
+
+	public List<Aluno> pesquisaPorGeolocalizao(Aluno aluno) {
+	    criarConexao();
+	    MongoCollection<Aluno> alunoCollection = this.bancoDeDados.getCollection("alunos", Aluno.class);
+	    alunoCollection.createIndex(Indexes.geo2dsphere("contato"));
+
+	    List<Double> coordinates = aluno.getContato().getCoordinates();
+	    Point pontoReferencia = new Point(new Position(coordinates.get(0), coordinates.get(1)));
+
+	    MongoCursor<Aluno> resultados = alunoCollection.find(Filters.nearSphere("contato", pontoReferencia, 2000.0, 0.0)).limit(2).skip(1).iterator();
+	    List<Aluno> alunos = popularAlunos(resultados);
+
+	    fecharConexao();
+	    return alunos;
 	}
 }
